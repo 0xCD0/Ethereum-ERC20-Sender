@@ -1,4 +1,4 @@
-# getEthereumBalance
+# Ethereum Sender/Balance Viewer (used Nethereum)
 
 <img src="https://user-images.githubusercontent.com/4960838/47614180-ea1a7f00-dade-11e8-878f-10200595493d.png">
 
