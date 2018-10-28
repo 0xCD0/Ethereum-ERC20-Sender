@@ -1,70 +1,58 @@
 ﻿using System;
-using System.Threading.Tasks;
-using Nethereum.Web3;
+using Ethereum;
 
 namespace EthereumBalance {
-
-    #region Ethereum Server Enum
-    enum EthereumServerList {
-        MainNet_Ethereum_Network,
-        Ropsten_Test_Network,
-        Kovan_Test_Network,
-        Rinkeby_Test_Network
-    }
-    #endregion
-
     class Program {
-        // Ethereum Wallet 주소를 입력합니다.
-        public static string walletAddress = "Input your walletAddress here";
+        public static EthereumUtility eth;
 
         static void Main(string[] args) {
+            eth = new EthereumUtility();
 
-            // EthereumServerList 열거형에서 서버 리스트를 선택하여 입력하십시오.
-            GetAccountBalance(EthereumServerList.MainNet_Ethereum_Network, walletAddress).Wait();
+            // Ethereum 전송 완료 후 Transaction Hash를 받기 위한 Callback 등록
+            eth.TransactionHashReady_Event += Eth_TransactionHashReady_Event;
+
+            // 자신의 Ethereum Wallet의 Private Key를 입력
+            eth.PrivateKey = "Input Your ethereum wallet private key";
+
+            // RPC 서버 선택
+            eth.Server = EthereumUtility.EthereumServerList.Ropsten_Test_Network;
+
+            // 잔액 조회 
+            eth.GetAccountBalanceFromPrivateKey().Wait();
+
+            // Ethereum 송금 (toAddr에 송금할 Ethereum Wallet 주소 입력)
+            string toAddr = "Input receive ethereum wallet address";
+            eth.TransferEthereum(toAddr, 0.05f).Wait();
+
             Console.ReadLine();
         }
 
         /// <summary>
-        /// Ethereum의 잔액을 조회합니다.
+        /// Ethereum 송금이 완료 된 후 호출되는 Callback Event입니다. Transaction Hash를 출력합니다.
         /// </summary>
-        /// <param name="server">EthereumServerList 열거형에서 조회할 서버를 입력합니다.</param>
-        /// <param name="walletAddress">지갑 주소를 입력합니다.</param>
-        static async Task GetAccountBalance(EthereumServerList server, string walletAddress) {
-            string serverLocation = string.Empty;
+        /// <param name="Hash">송금 완료 후의 Transaction Hash 값입니다.</param>
+        private static void Eth_TransactionHashReady_Event(string Hash) {
+            Console.WriteLine($"Transaction Hash : {Hash}");
 
-            switch (server) {
-                case EthereumServerList.MainNet_Ethereum_Network:
-                    serverLocation = "https://mainnet.infura.io";
+            #region Transaction Hash 수신 후 EtherScan.io에서 각 서버별 Transaction 확인
+            string server = string.Empty;
+
+            switch (eth.Server) {
+                case EthereumUtility.EthereumServerList.Ropsten_Test_Network:
+                    server = "ropsten.";
                     break;
 
-                case EthereumServerList.Ropsten_Test_Network:
-                    serverLocation = "https://ropsten.infura.io";
+                case EthereumUtility.EthereumServerList.Kovan_Test_Network:
+                    server = "kovan.";
                     break;
 
-                case EthereumServerList.Kovan_Test_Network:
-                    serverLocation = "https://kovan.infura.io";
-                    break;
-
-                case EthereumServerList.Rinkeby_Test_Network:
-                    serverLocation = "https://rinkeby.infura.io";
+                case EthereumUtility.EthereumServerList.Rinkeby_Test_Network:
+                    server = "rinkeby.";
                     break;
             }
 
-            try {
-                var web3 = new Web3(serverLocation);
-
-                #region Ethereum의 잔액 조회 부분
-                // Wei는 BitCoin의 사토시 처럼 존재하는 Ethereum의 최소 단위입니다.
-                var balance = await web3.Eth.GetBalance.SendRequestAsync(walletAddress);
-                Console.WriteLine($"Balance in Wei: {balance.Value}");
-
-                var etherAmount = Web3.Convert.FromWei(balance.Value);
-                Console.WriteLine($"Balance in Ethereum: {etherAmount}");
-                #endregion
-            }
-            catch (Exception ex) {
-                Console.WriteLine($"Ethereum wallet 주소가 잘못되었거나 잘못된 입력입니다. \r\n\r\n Original Message : { ex.ToString()}");
-            }
+            System.Diagnostics.Process.Start("explorer.exe", string.Format("https://{0}etherscan.io/tx/{1}", server, Hash));
+            #endregion
 
         }
     }
