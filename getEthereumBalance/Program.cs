@@ -1,12 +1,25 @@
 ﻿using System;
-using Ethereum;
+using EthereumUtility.ETHUtility;
+using EthereumUtility.AccountUtility;
 
 namespace EthereumBalance {
     class Program {
-        public static EthereumUtility eth;
+        public static ETHUtility eth;
+        public static AccountUtility acc;
 
         static void Main(string[] args) {
-            eth = new EthereumUtility();
+            #region 지갑 생성 코드
+            // Ethereum의 지갑 생성 코드입니다. 아래 주석을 풀고 실행 후 생성 성공시 PrivateKey와 WalletAccount 주소가 출력됩니다.
+            // WalletAddress 주소는 랜덤 Hash 입니다.
+
+            //acc = new AccountUtility();
+            //AccountInfo temp = acc.CreateEthereumAccount();
+
+            //Console.WriteLine($"Private Key : {temp.privateKey.ToString()} \r\nWalletAddress : {temp.accountAddress.ToString()}");
+            #endregion
+
+            #region Sample Code
+            eth = new ETHUtility();
 
             // Ethereum 전송 완료 후 Transaction Hash를 받기 위한 Callback 등록
             eth.TransactionHashReady_Event += Eth_TransactionHashReady_Event;
@@ -15,7 +28,7 @@ namespace EthereumBalance {
             eth.PrivateKey = "Input Your ethereum wallet private key";
 
             // RPC 서버 선택
-            eth.Server = EthereumUtility.EthereumServerList.Ropsten_Test_Network;
+            eth.Server = ETHUtility.EthereumServerList.Ropsten_Test_Network;
 
             // 잔액 조회 
             eth.GetAccountBalanceFromPrivateKey().Wait();
@@ -23,7 +36,7 @@ namespace EthereumBalance {
             // Ethereum 송금 (toAddr에 송금할 Ethereum Wallet 주소 입력)
             string toAddr = "Input receive ethereum wallet address";
             eth.TransferEthereum(toAddr, 0.05f).Wait();
-
+            #endregion
             Console.ReadLine();
         }
 
@@ -38,15 +51,15 @@ namespace EthereumBalance {
             string server = string.Empty;
 
             switch (eth.Server) {
-                case EthereumUtility.EthereumServerList.Ropsten_Test_Network:
+                case ETHUtility.EthereumServerList.Ropsten_Test_Network:
                     server = "ropsten.";
                     break;
 
-                case EthereumUtility.EthereumServerList.Kovan_Test_Network:
+                case ETHUtility.EthereumServerList.Kovan_Test_Network:
                     server = "kovan.";
                     break;
 
-                case EthereumUtility.EthereumServerList.Rinkeby_Test_Network:
+                case ETHUtility.EthereumServerList.Rinkeby_Test_Network:
                     server = "rinkeby.";
                     break;
             }

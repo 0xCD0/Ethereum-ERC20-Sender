@@ -7,8 +7,8 @@ using Nethereum.Hex.HexTypes;
 /// <summary>
 /// Nethereum을 손쉽게 사용하기 위한 함수들이 모인 Utility 클래스입니다.
 /// </summary>
-namespace Ethereum {
-    public class EthereumUtility {
+namespace EthereumUtility.ETHUtility {
+    public class ETHUtility {
         #region Transaction Hash Event
         public delegate void TransactionHashReady(string Hash);
         public event TransactionHashReady TransactionHashReady_Event;
